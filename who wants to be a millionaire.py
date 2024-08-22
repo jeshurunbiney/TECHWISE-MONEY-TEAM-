@@ -22,6 +22,7 @@ pygame.display.set_caption("Who Wants to Be a Millionaire")
 
 # Load font
 font = pygame.font.Font(None, FONT_SIZE)
+digital_font = pygame.font.Font(pygame.font.match_font('digital'), 60)  # Digital clock style font
 
 # Load images and sounds
 background_image = pygame.image.load("/Users/jeshurunbiney/Downloads/game background.jpg")
@@ -132,16 +133,17 @@ def check_answer(question, answer):
 
 def display_score():
     score_text = font.render(f"Score: {prize_money[score]}", True, WHITE)
-    screen.blit(score_text, (50, 50))
+    screen.blit(score_text, (SCREEN_WIDTH - score_text.get_width() - 100, 50))  # Adjusted position for score
 
 def display_timer(remaining_time):
-    timer_text = font.render(f"Time left: {remaining_time // 1000} seconds", True, WHITE)
-    screen.blit(timer_text, (SCREEN_WIDTH - 400, 50))
+    timer_text = digital_font.render(f"{remaining_time // 1000}", True, WHITE)  # Use digital style font
+    screen.blit(timer_text, (50, 50))  # Adjusted position for timer
 
 def main_game_loop():
     global current_question, timer_start, selected_answer
     running = True
     timer_start = pygame.time.get_ticks()
+
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -155,22 +157,26 @@ def main_game_loop():
                     if current_question >= len(questions):
                         running = False
                     else:
-                        display_question(questions[current_question])
                         timer_start = pygame.time.get_ticks()
 
         if current_question < len(questions):
+            screen.blit(background_image, (0, 0))
             display_question(questions[current_question])
+            
+            # Display score and timer after drawing the question
             display_score()
             elapsed_time = pygame.time.get_ticks() - timer_start
             remaining_time = TIMER_DURATION - elapsed_time
             display_timer(remaining_time)
+            
             if remaining_time <= 0:
                 current_question += 1
                 if current_question >= len(questions):
                     running = False
                 else:
-                    display_question(questions[current_question])
                     timer_start = pygame.time.get_ticks()
+
+        pygame.display.flip()
 
     # Game over screen
     screen.fill(BLACK)
